@@ -1,0 +1,70 @@
+﻿<div class="row w-100 mb-1">
+    <div class="col-4 col-sm-4 bg-light p-2">
+        <label for="dropdownMenu">Select a company:</label>
+        <select id="dropdownMenu" class="form-select">
+        </select>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/Home/GetAllCompanies',
+            type: 'GET',
+            success: function (data) {
+                var dropdown = $('#dropdownMenu');
+                // Clear the dropdown first
+                dropdown.empty();
+
+                dropdown.append('<option value="">Select an option</option>');
+
+                data.forEach(function(company) {
+                    dropdown.append('<option value="' + company.id + '">' + company.name + '</option>');
+                });
+            },
+            error: function (error) {
+                console.error('Failed to load companies:', error.responseText);
+            }
+        });
+
+      $('#dropdownMenu').change(function () {
+        var selectedValue = $(this).val();
+        if (selectedValue) {
+            $.ajax({
+                url: '/Home/SetDropdownValue',
+                type: 'POST',
+                data: { selectedValue: selectedValue },
+                success: function (response) {
+                    $('#textBox').val(selectedValue);
+                },
+                error: function (error) {
+                    console.error('Failed to set dropdown value:', error.responseText);
+                }
+            });
+        } else {
+            console.warn('No value selected.');
+        }
+    });
+
+
+    });
+</script>
+<script>
+        $(document).ready(function () {
+        var textBoxValue = $('#textBox').val();
+
+        if (!textBoxValue || textBoxValue.trim() === "") {
+            $.ajax({
+                url: '/Home/ResetDropdownValue',
+                type: 'POST',
+                success: function (response) {
+                    $('#textBox').val(response);
+                }
+            });
+        }
+    });
+
+</script>
+
