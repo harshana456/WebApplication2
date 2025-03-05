@@ -2,5 +2,59 @@
     var selectedValue = Context.Session.GetString("DropdownValue");
 }
 
-<h1>Privacy Page</h1>
-<p>Selected value: @selectedValue</p>
+<h1>test Page</h1>
+<input value="@selectedValue" id="selectValue" readonly/>
+
+<h2>Employees</h2>
+<table border="1" id="employeeTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Company ID</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var selectedValue = document.getElementById("selectValue").value;
+            var tableBody = document.querySelector("#employeeTable tbody");
+
+            function fetchEmployees(companyId) {
+                fetch(`https://localhost:7028/api/Employee/${companyId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Network response was not ok");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        tableBody.innerHTML = "";
+
+                        if (data.length === 0) {
+                            var row = `<tr><td colspan="3">No employees found</td></tr>`;
+                            tableBody.innerHTML = row;
+                        } else {
+                            data.forEach(emp => {
+                                var row = `<tr>
+                                    <td>${emp.id}</td>
+                                    <td>${emp.name}</td>
+                                    <td>${emp.companyId}</td>
+                                </tr>`;
+                                tableBody.innerHTML += row;
+                            });
+                        }
+                    })
+                    .catch(error => console.error("Error fetching employees:", error));
+            }
+
+            if (selectedValue) {
+                fetchEmployees(selectedValue);
+            }
+        });
+    </script>
+}
+
